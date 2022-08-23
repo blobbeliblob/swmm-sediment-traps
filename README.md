@@ -1,24 +1,22 @@
 # swmm-sediment-traps
- 
 
+### Acknowledgements
 
-# Installation
+This code was developed as part of the [HuLaKaS](http://www.itamerihaaste.net/tyomme/hankkeemme/hulakas) project, with the method and results detailed further in the accompanying [master's thesis]() report. 
 
-The code requires the pyswmmm package, available at 
+### Description
 
-https://github.com/OpenWaterAnalytics/pyswmm
+The code simulates the installation of sediment traps into the sewer inlets of urban catchments parametrized in US EPA's Storm Water Management Model ([SWMM](https://www.epa.gov/water-research/storm-water-management-model-swmm)). 
 
-This can be installed by running pip 
+### Installation
+
+The code requires the pyswmmm package, available [here](https://github.com/OpenWaterAnalytics/pyswmm). This can be installed by running pip 
 
 ```
 pip install pyswmm
 ```
 
-If there are errors encountered, this may be due to the swmm-toolkit package not being properly installed. If this happens, download it from 
-
-https://github.com/OpenWaterAnalytics/swmm-python
-
-and install the .whl file
+If there are errors encountered, this may be due to the swmm-toolkit package not being properly installed. If this happens, download it [here](https://github.com/OpenWaterAnalytics/swmm-python) and install the .whl file
 
 ```
 pip install path/to/the/file.whl
@@ -27,7 +25,7 @@ pip install path/to/the/file.whl
 Make sure you are running a compatible version of Python!
 As of 16.08.2022, Python 3.6, 3.8, 3.9 have been tested. 
 
-When running the code, if there is a pyswmm error where solver.py is not being found, go to the python site-packages and copy all .dll files from swmm_toolkit/ into swmm/toolkit/.
+When running the code, if there is a pyswmm error where solver.py is not being found, go to the python site-packages and copy all .dll files from *swmm_toolkit/* into *swmm/toolkit/*.
 
 
 
