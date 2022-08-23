@@ -10,7 +10,9 @@ The code simulates the installation of sediment traps into the sewer inlets of u
 
 ### Installation
 
-The code requires the pyswmmm package, available [here](https://github.com/OpenWaterAnalytics/pyswmm). This can be installed by running pip 
+Downloads are found under [Releases](https://github.com/blobbeliblob/swmm-sediment-traps/releases). 
+
+The code requires the pyswmm package, available [here](https://github.com/OpenWaterAnalytics/pyswmm), which can be installed by running pip 
 
 ```
 pip install pyswmm
@@ -27,6 +29,12 @@ As of 16.08.2022, Python 3.6, 3.8, 3.9 have been tested.
 
 When running the code, if there is a pyswmm error where solver.py is not being found, go to the python site-packages and copy all .dll files from *swmm_toolkit/* into *swmm/toolkit/*.
 
+### Usage
 
+The code can be executed by running *run_program.bat*, which serves to run the various .py files and their functions. The simulation settings can be modified in *settings.ini* (or *simulation_scenarios.json* for automated simulation runs). 
+
+### License
+
+see the included [license](https://github.com/blobbeliblob/swmm-sediment-traps/blob/main/LICENSE).
 
 
