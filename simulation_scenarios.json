@@ -1,0 +1,86 @@
+
+{
+
+"default_settings":
+{
+	"input_file": "TP_HULAKAS_.inp", 
+	"create_report": "0",	
+	"results_file": "test_results.xlsx",
+	"res_id": "default",
+	"restore_backup": "1",
+	"create_backup": "1",
+	"separate_junctions": "1",
+	"height_offset": "0.001",
+	"conduit_length": "2.3",
+	"coord_offset": "0.5",
+	"junction_suffix": "_manhole",
+	"create_treatment_scenarios": "1",
+	"number_of_scenarios": "0",
+	"number_of_samples": "5",
+	"pollutant": "TSS",
+	"formula": "R;0.917",
+	"max_capacity": "40",
+	"maintenance_interval": "30",
+	"use_specific_scenarios": "0",
+	"user_scenarios": "IP02, IP01, IP06, IP16, IP17, IP03, IE46, IP13, IE69, IP08",
+	"land_use_prioritization": "0",
+	"preferred_land_uses": "Green, Street, Pavement",
+	"rank_junctions": "0",
+	"REPORT_STEP": "00:01:00",
+	"WET_STEP": "00:00:04",
+	"DRY_STEP": "00:00:10",
+	"ROUTING_STEP": "00:00:03",
+	"run_simulations": "1",
+	"outfall_node": "OUT01",
+	"start_date": "06/04/2009",
+	"end_date": "06/04/2009",
+	"suppress_output": "0",
+	"order_criteria": "removal_mass",
+	"accumulative_statistics": "1"
+}, 
+
+"simulation_scenarios":
+{
+	"1_day_with_rain":
+	{
+		"res_id": "1dwr", 
+		"input_file": "TP_HULAKAS_EMC_set_3.inp",
+		"start_date": "06/04/2009",
+		"end_date": "06/04/2009",
+		"rank_junctions": "1"
+	}, 
+	"1_day_with_no_rain":
+	{
+		"res_id": "1dnr", 
+		"input_file": "TP_HULAKAS_EMC_set_3.inp",
+		"start_date": "06/01/2009",
+		"end_date": "06/01/2009",
+		"rank_junctions": "1"
+	}, 
+	"6_months":
+	{
+		"res_id": "6m", 
+		"input_file": "TP_HULAKAS_EMC_set_3.inp",
+		"start_date": "05/01/2009",
+		"end_date": "10/31/2009",
+		"rank_junctions": "1"
+	}
+}, 
+
+"maintenance":
+{
+	"1":
+	{
+		"max_capacity": "40", 
+		"maintenance_interval": "180"
+	}, 
+	"2":
+	{
+		"max_capacity": "20", 
+		"maintenance_interval": "180"
+	}
+}
+
+}
+
+

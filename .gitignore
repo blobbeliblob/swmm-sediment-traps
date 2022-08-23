@@ -1,0 +1,20 @@
+
+# python cache
+__pycache__/
+
+# simulation results
+temp/
+
+# backup files
+*.bak
+
+# swmm files
+
+*.inp
+*.rpt
+*.out
+
+# excel files
+
+*.xlsx
+
