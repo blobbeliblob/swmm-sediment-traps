@@ -53,6 +53,9 @@ IF %input%==6 (
 IF %input%==7 (
 	py -%pythonversion% delete_all_sim_files.py
 )
+IF %input%==8 (
+	py -%pythonversion% sediment_traps_v2.py
+)
 
 IF %input%==0 (
 	echo 1. Simulation ^(automated^): Run the simulations.py file, executing various sets of simulation scenarios automatically and dynamically modifying the settings.ini file between scenarios
