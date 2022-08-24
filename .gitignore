@@ -13,8 +13,10 @@ temp/
 *.inp
 *.rpt
 *.out
+*.dat
 
 # excel files
 
 *.xlsx
+
 

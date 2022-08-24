@@ -869,9 +869,12 @@ def simulate_scenarios(settings_file="settings.ini"):
 			outfall = Nodes(sim)[settings["outfall_node"]]
 			
 			system_routing = SystemStats(sim)	# cumulative statistics
-			inlets = [node if node in sewer_inlets for node in Nodes(sim)]	# nodes that receive water from subcatchments
+			inlets = [node for node in Nodes(sim) if node in sewer_inlets]	# nodes that receive water from subcatchments
 			inlet_inflow = {}	# volume inflow to inlets
 			inlet_quality = {}	# water quality of inflow (concentration)
+			for inlet in inlets:
+				inlet_inflow[inlet.nodeid] = []
+				inlet_quality[inlet.nodeid]
 			
 			# execute simulation
 			step_times.append(sim.start_time)	# add initial time stamp to list of time steps to facilitate calculation of time step duration later on
@@ -881,8 +884,6 @@ def simulate_scenarios(settings_file="settings.ini"):
 				discharge_system.append(outfall.total_inflow)	# add current system discharge to list of discharges at time steps
 				tss_system.append(outfall.pollut_quality[settings["pollutant"]])	# add current pollution to list of pollution at time steps
 				for inlet in inlets:
-					inlet_inflow[inlet.nodeid] = [] if not inlet.nodeid in inlet_inflow else pass
-					inlet_quality[inlet.nodeid] = [] if not inlet.nodeid in inlet_quality else pass
 					inlet_inflow[inlet.nodeid].append(inlet.lateral_inflow)
 					inlet_quality[inlet.nodeid].append(inlet.pollut_quality[settings["pollutant"]])
 				if not settings["suppress_output"]: progressbar(sim.percent_complete, scenario_count/len(treatment_scenarios), time_remaining=time_remaining_formatted)	# update progressbar to current completion
