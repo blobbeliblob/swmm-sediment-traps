@@ -1,5 +1,6 @@
 
 import sediment_traps
+import maintenance
 
 import os
 from shutil import copy2
@@ -10,7 +11,7 @@ def main():
 	# needed for colored print to work
 	os.system("")
 
-	settings_path = "settings_temp.ini"
+	settings_path = "settings_temp_s.ini"
 	# copy settings file to avoid corruption
 	copy2("settings.ini", settings_path)
 	
@@ -42,6 +43,8 @@ def main():
 		copy2(settings["results_file"], "results/" + settings["results_file"].replace(".xlsx", suffix + ".xlsx"))
 		# delete the temporary results file
 		os.unlink(settings["results_file"])
+		# run maintenance on results
+		maintenance.run_maintenance()
 	
 	# delete backup file
 	os.unlink(settings_path)

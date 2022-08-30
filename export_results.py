@@ -12,7 +12,7 @@ def main():
 	# needed for colored print to work
 	os.system("")
 
-	settings_path = "settings_temp.ini"
+	settings_path = "settings_temp_e.ini"
 	# copy settings file to avoid corruption
 	copy2("settings.ini", settings_path)
 	
