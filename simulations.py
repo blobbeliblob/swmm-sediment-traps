@@ -20,7 +20,7 @@ def main():
 	with open("simulation_scenarios.json") as f:
 		sim_data = json.load(f)
 	
-	variations = [{sim_data["simulation_scenarios"][scenario][param] for param in sim_data["simulation_scenarios"][scenario]} for scenario in sim_data["simulation_scenarios"]]
+	variations = [{param: sim_data["simulation_scenarios"][scenario][param] for param in sim_data["simulation_scenarios"][scenario]} for scenario in sim_data["simulation_scenarios"]]
 	
 	##########
 	
