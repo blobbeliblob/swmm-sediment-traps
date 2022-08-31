@@ -6,7 +6,7 @@ IMPORT PACKAGES
 # import pyswmm modules
 from pyswmm import Simulation, Nodes, SystemStats
 # import utility functions
-from utilities import progressbar, display_progress, color_print, get_yes_no, suppress_stdout, nostdout, stdout_redirected, write_iterable, print_iterable
+from utilities import progressbar_simple, progressbar, display_progress, color_print, get_yes_no, suppress_stdout, nostdout, stdout_redirected, write_iterable, print_iterable
 # for data export
 from pandas import DataFrame, ExcelWriter
 # for making backup copy
@@ -804,7 +804,7 @@ def simulate_scenarios(settings_file="settings.ini"):
 	print("\nReading data from input file...")
 	data = get_points_of_interest(inp_file)
 	landuses = data["junction_coverages"]
-	areas = data["junction_areas"]
+	areas = data["junction_areas"]	# areas in ha
 	sewer_inlets = data["junctions_with_manholes"]
 	color_print("Complete", "green")
 	
@@ -831,14 +831,6 @@ def simulate_scenarios(settings_file="settings.ini"):
 		# for total simulation time
 		total_sim_time_start = time.time()
 		
-		# for calculating time remaining
-		average_duration = 0
-		time_remaining = 0
-		time_remaining_formatted = "99:99:99"
-		
-		scenario_count = 0	# used in progressbar
-		total_TSS_system = 0
-		
 		try:	# error handling in case of mid-simulation crash in swmm engine
 			
 			# start the timer
@@ -859,71 +851,73 @@ def simulate_scenarios(settings_file="settings.ini"):
 			duration = (sim.end_time - sim.start_time).total_seconds()
 
 			# properties to investigate
-			discharge_system = []
-			tss_system = []
 			step_times = []
-			total_volume = 0.0		# total volume discharged through outlet
-			total_TSS = 0.0			# total suspended solids
 
 			# system outlet
 			outfall = Nodes(sim)[settings["outfall_node"]]
 			
 			system_routing = SystemStats(sim)	# cumulative statistics
-			inlets = [node for node in Nodes(sim) if node in sewer_inlets]	# nodes that receive water from subcatchments
-			inlet_inflow = {}	# volume inflow to inlets
-			inlet_quality = {}	# water quality of inflow (concentration)
+			inlets = [node for node in Nodes(sim) if node.nodeid in sewer_inlets]	# nodes that receive water from subcatchments
+			discharge = {"system": []}	# discharge at nodes
+			volume = {}
+			volume_cum = {}
+			volume_tot = {}
+			quality = {"system": []}	# water quality (concentration)
+			pollutant_load = {}			# pollutant load (mass)
+			pollutant_load_cum = {}
+			pollutant_load_tot = {}
+			pollutant_load_removal_percent = {}		# pollutant load at node divided by system pollutant load
+			pollutant_load_removal_per_area = {}
 			for inlet in inlets:
-				inlet_inflow[inlet.nodeid] = []
-				inlet_quality[inlet.nodeid]
+				discharge[inlet.nodeid] = []
+				quality[inlet.nodeid] = []
 			
 			# execute simulation
 			step_times.append(sim.start_time)	# add initial time stamp to list of time steps to facilitate calculation of time step duration later on
-			progressbar(0, scenario_count/len(treatment_scenarios), time_remaining=time_remaining_formatted)	# start progressbar at 0
+			progressbar_simple(0)	# start progressbar at 0
 			for step in sim:
 				step_times.append(sim.current_time)	# add current time stamp to the list of time steps
-				discharge_system.append(outfall.total_inflow)	# add current system discharge to list of discharges at time steps
-				tss_system.append(outfall.pollut_quality[settings["pollutant"]])	# add current pollution to list of pollution at time steps
+				discharge["system"].append(outfall.total_inflow)	# add current system discharge to list of discharges at time steps
+				quality["system"].append(outfall.pollut_quality[settings["pollutant"]])	# add current pollution to list of pollution at time steps
 				for inlet in inlets:
-					inlet_inflow[inlet.nodeid].append(inlet.lateral_inflow)
-					inlet_quality[inlet.nodeid].append(inlet.pollut_quality[settings["pollutant"]])
-				if not settings["suppress_output"]: progressbar(sim.percent_complete, scenario_count/len(treatment_scenarios), time_remaining=time_remaining_formatted)	# update progressbar to current completion
+					discharge[inlet.nodeid].append(inlet.lateral_inflow)
+					quality[inlet.nodeid].append(inlet.pollut_quality[settings["pollutant"]])
+				if not settings["suppress_output"]: progressbar_simple(sim.percent_complete)	# update progressbar to current completion
 			
 			total_volume2 = system_routing.routing_stats["outflow"]
 			flow_error = system_routing.routing_stats["routing_error"]
 			quality_error = sim.quality_error
 			
-			# get volume in liters
-			# V_tot = sum( V_i ) = sum( Q_i * dt )
-			volume_per_step = [discharge_system[i] * (step_times[i+1] - step_times[i]).total_seconds() for i in range(len(discharge_system))]
-			cumulative_volume = cumsum(volume_per_step)
-			total_volume += sum(volume_per_step)
-			print("total volume: ", total_volume, total_volume2)
-			# get pollutant load in mg
-			# TSS_tot = sum ( TSS_i ) = sum ( C(TSS)_i * V_i )
-			tss_per_step = [tss_system[i] * volume_per_step[i] for i in range(len(tss_system))]
-			cumulative_tss = cumsum(tss_per_step)
-			total_TSS += sum(tss_per_step)
-			total_TSS_system = total_TSS if scenario_count == 0 else total_TSS_system
-			
-			# used for calculating when the capacity of the filter is reached
-			# note! tss_manhole_per_step gives the values of the pollutant at the node after treatment
-			volume_manhole_per_step = [discharge_manhole[i] * (step_times[i+1] - step_times[i]).total_seconds() for i in range(len(discharge_manhole))] if scenario_count != 0 else None
-			tss_manhole_per_step = [tss_manhole[i] * volume_manhole_per_step[i] for i in range(len(tss_manhole))] if scenario_count != 0 else None
-			
 			# calculate land use of solution in regards to area (area in m2)
-			area_covered = {"total": 0}
-			for landuse in landuses:
-				area_covered[landuse] = 0
-			for node in scenario.keys():
-				node = node.replace(settings["junction_suffix"], "")
-				for area in areas[node]:
-					area_covered[area] += areas[node][area] * 10**4
+			area_covered = {inlet: {a: areas[inlet][a] * 10**4 for a in areas[inlet]} for inlet in areas}
 			
-			# pollutant load difference between default scenario without treatment and treatment scenarios
-			removal_mass = 0 if scenario_count == 0 else -(total_TSS - total_TSS_system)
-			removal_percent = 0 if scenario_count == 0 or total_TSS_system == 0 else removal_mass / total_TSS_system * 100
-			# pollutant load removal per area
-			removal_per_area = 0 if area_covered["total"] == 0 else removal_mass / area_covered["total"]
+			# calculate step durations
+			step_durations = [(step_times[i+1] - step_times[i]).total_seconds() for i in range(len(step_times)-1)]
+			
+			# system properties
+			# volume in liters
+			# V_tot = sum( V_i ) = sum( Q_i * dt )
+			# pollutant load in mg
+			# TSS_tot = sum ( TSS_i ) = sum ( C(TSS)_i * V_i )
+			volume["system"] = [discharge["system"][i] * step_durations[i] for i in range(len(discharge["system"]))]
+			volume_cum["system"] = cumsum(volume["system"])
+			volume_tot["system"] = sum(volume["system"])
+			print("total volume: ", volume_tot["system"], total_volume2)
+			pollutant_load["system"] = [quality["system"][i] * volume["system"][i] for i in range(len(quality["system"]))]
+			pollutant_load_cum["system"] = cumsum(pollutant_load["system"])
+			pollutant_load_tot["system"] = sum(pollutant_load["system"])
+			pollutant_load_removal_percent["system"] = 0
+			pollutant_load_removal_per_area["system"] = 0
+			
+			# inlet properties
+			# note! pollutant_load gives the values of the pollutant load at the node after treatment
+			for inlet in inlets:
+				volume[inlet.nodeid] = [inlet_inflow[inlet.nodeid][i] * step_durations[i] for i in range(len(inlet_inflow[inlet.nodeid]))]
+				pollutant_load[inlet.nodeid] = [inlet_quality[inlet.nodeid][i] * volume[inlet.nodeid][i] for i in range(len(inlet_quality[inlet.nodeid]))]
+				pollutant_load_cum[inlet.nodeid] = cumsum(pollutant_load[inlet.nodeid])
+				pollutant_load_tot[node.nodeid] = sum(pollutant_load[inlet.nodeid])
+				pollutant_load_removal_percent[inlet.nodeid] = pollutant_load_tot[inlet.nodeid] / pollutant_load_tot["system"] * 100
+				pollutant_load_removal_per_area[inlet.nodeid] = pollutant_load_tot[inlet.nodeid] / area_covered[inlet.nodeid]["total"]
 			
 			# end the timer
 			timer_end = time.time()
@@ -933,52 +927,51 @@ def simulate_scenarios(settings_file="settings.ini"):
 			minutes = "{:02d}".format(int(((timer_end - timer_start)%3600)//60))
 			seconds = "{:02d}".format(int((timer_end - timer_start)%3600%60))
 			simulation_duration = hours + ":" + minutes + ":" + seconds
-			
-			# recalculate average simulation duration and time remaining
-			average_duration = (time.time() - total_sim_time_start) / (scenario_count + 1)
-			time_remaining = (len(treatment_scenarios) - scenario_count) * average_duration
-			time_remaining_formatted = "{:02d}".format(int(time_remaining//3600)) + ":" + "{:02d}".format(int((time_remaining%3600)//60)) + ":" + "{:02d}".format(int(time_remaining%3600%60))
 
 			del step_times[0]	# remove start time from steps to have same amount of elements as volume and pollutant arrays
 			
-			exported_results = {"start": sim.start_time, \
-								"end": sim.end_time, \
-								"simulation_time": simulation_duration, \
-								"nodes": list(scenario.keys()), \
-								"total_volume": total_volume, \
-								"flow_error": flow_error, \
-								"total_TSS": total_TSS, \
-								"total_TSS_system": total_TSS_system, \
-								"quality_error": quality_error, \
-								"removal_mass": removal_mass, \
-								"removal_percent": removal_percent, \
-								"removal_per_area": removal_per_area, \
-								"step_times": step_times, \
-								"volume_per_step": volume_per_step, \
-								"tss_per_step": tss_per_step, \
-								"cumulative_volume": cumulative_volume, \
-								"cumulative_tss": cumulative_tss, \
-								"area_covered": area_covered, \
-								"area_covered_total": area_covered["total"]}
-			exported_results["volume_manhole_per_step"] = volume_manhole_per_step if scenario_count != 0 else None
-			exported_results["tss_manhole_per_step"] = tss_manhole_per_step if scenario_count != 0 else None
-			
-			pickle.dump(exported_results, open("temp/simulation_results_"+str(scenario_count)+".p", "wb"))
+			# export temporary results
+			ids = ["system"]
+			for inlet in inlets:
+				ids.append(inlet.nodeid)
+			count = 0
+			for id in ids:
+				exported_results = {"start": sim.start_time, \
+									"end": sim.end_time, \
+									"simulation_time": simulation_duration, \
+									"nodes": id, \
+									"total_volume": volume_tot[id], \
+									"flow_error": flow_error, \
+									"total_TSS": pollutant_load_tot["system"], \
+									"total_TSS_system": pollutant_load_tot["system"], \
+									"quality_error": quality_error, \
+									"removal_mass": pollutant_load_tot[id], \
+									"removal_percent": pollutant_load_removal_percent[id], \
+									"removal_per_area": pollutant_load_removal_per_area[id], \
+									"step_times": step_times, \
+									"volume_per_step": volume[id], \
+									"system_quality_per_step": pollutant_load["system"], \
+									"cumulative_volume": volume_cum["system"], \
+									"cumulative_tss": pollutant_load_cum["system"], \
+									"area_covered": area_covered[id], \
+									"area_covered_total": area_covered[id]["total"]}
+				exported_results["volume_manhole_per_step"] = volume[id] if id != "system" else None
+				exported_results["tss_manhole_per_step"] = pollutant_load[id] if id != "system" else None
+				pickle.dump(exported_results, open("temp/simulation_results_"+str(count)+".p", "wb"))
+				count += 1
 			
 			# create report
 			if settings["create_report"]:
 				sim.report()
 			# remember to close the simulation
 			sim.close()
-			
-			scenario_count += 1
 		
 		except Exception as e:
 			color_print("\nSimulation failed", "red")
 			#color_print("Reason:\t"+str(e), "red")
 		
 		# set the progressbar to complete for visual pleasure
-		if not settings["suppress_output"]: progressbar(1, scenario_count/len(treatment_scenarios))
+		if not settings["suppress_output"]: progressbar_simple(1)
 		color_print("\nComplete", "green")
 		
 		# total simulation time
