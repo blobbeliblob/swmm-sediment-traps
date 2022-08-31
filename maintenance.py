@@ -13,7 +13,10 @@ def run_maintenance():
 	
 	settings_path = "settings_temp_m.ini"
 	# copy settings file to avoid corruption
-	copy2("settings.ini", settings_path)
+	if Path("settings_temp_s.ini"):
+		copy2("settings_temp_s.ini", settings_path)
+	else:
+		copy2("settings.ini", settings_path)
 	
 	# load json data
 	with open("simulation_scenarios.json") as f:
