@@ -403,7 +403,7 @@ def get_simulation_results():
 	simulation_results = []
 	display_progress(0)
 	for i in range(scenario_count):
-		mod_num = 1000
+		mod_num = 1
 		res = pickle.load(open("temp/simulation_results_"+str(i)+".p", "rb"))
 		res["step_times"] = res["step_times"][0::mod_num]
 		res["volume_per_step"] = [sum(res["volume_per_step"][you:you+mod_num]) for you in range(0, len(res["volume_per_step"]), mod_num)]
@@ -875,14 +875,36 @@ def simulate_scenarios(settings_file="settings.ini"):
 		# execute simulation
 		step_times.append(sim.start_time)	# add initial time stamp to list of time steps to facilitate calculation of time step duration later on
 		progressbar_simple(0)	# start progressbar at 0
+		mod_num = 1000
+		sim_count = 0
+		temp_discharge = {"system": []}
+		temp_quality = {"system": []}
+		for inlet in inlets:
+			temp_discharge[inlet.nodeid] = []
+			temp_quality[inlet.nodeid] = []
 		for step in sim:
-			step_times.append(sim.current_time)	# add current time stamp to the list of time steps
-			discharge["system"].append(outfall.total_inflow)	# add current system discharge to list of discharges at time steps
-			quality["system"].append(outfall.pollut_quality[settings["pollutant"]])	# add current pollution to list of pollution at time steps
+			temp_discharge["system"].append(outfall.total_inflow)
+			temp_quality["system"].append(outfall.pollut_quality[settings["pollutant"]])
 			for inlet in inlets:
-				discharge[inlet.nodeid].append(inlet.lateral_inflow)
-				quality[inlet.nodeid].append(inlet.pollut_quality[settings["pollutant"]])
+				temp_discharge[inlet.nodeid].append(inlet.lateral_inflow)
+				temp_quality[inlet.nodeid].append(inlet.pollut_quality[settings["pollutant"]])
+			if sim_count % mod_num == 0:
+				step_times.append(sim.current_time)	# add current time stamp to the list of time steps
+				discharge["system"].append(sum(temp_discharge["system"]))	# add current system discharge to list of discharges at time steps
+				quality["system"].append(sum(temp_quality["system"]))	# add current pollution to list of pollution at time steps
+				for inlet in inlets:
+					discharge[inlet.nodeid].append(sum(temp_discharge[inlet.nodeid]))
+					quality[inlet.nodeid].append(sum(temp_quality[inlet.nodeid]))
+				temp_discharge = {"system": []}
+				temp_quality = {"system": []}
+				for inlet in inlets:
+					temp_discharge[inlet.nodeid] = []
+					temp_quality[inlet.nodeid] = []
 			if not settings["suppress_output"]: progressbar_simple(sim.percent_complete)	# update progressbar to current completion
+			sim_count += 1
+	
+		# set the progressbar to complete for visual pleasure
+		if not settings["suppress_output"]: progressbar_simple(1)
 		
 		color_print("\nComplete", "green")
 		
@@ -912,7 +934,6 @@ def simulate_scenarios(settings_file="settings.ini"):
 		volume["system"] = [discharge["system"][i] * step_durations[i] for i in range(len(discharge["system"]))]
 		volume_cum["system"] = cumsum(volume["system"])
 		volume_tot["system"] = sum(volume["system"])
-		print("total volume: ", volume_tot["system"], total_volume2)
 		pollutant_load["system"] = [quality["system"][i] * volume["system"][i] for i in range(len(quality["system"]))]
 		pollutant_load_cum["system"] = cumsum(pollutant_load["system"])
 		pollutant_load_tot["system"] = sum(pollutant_load["system"])
@@ -955,7 +976,7 @@ def simulate_scenarios(settings_file="settings.ini"):
 			exported_results = {"start": sim.start_time, \
 								"end": sim.end_time, \
 								"simulation_time": simulation_duration, \
-								"nodes": id, \
+								"nodes": [id], \
 								"total_volume": volume_tot[id], \
 								"flow_error": flow_error, \
 								"total_TSS": pollutant_load_tot["system"], \
@@ -966,7 +987,7 @@ def simulate_scenarios(settings_file="settings.ini"):
 								"removal_per_area": pollutant_load_removal_per_area[id], \
 								"step_times": step_times, \
 								"volume_per_step": volume[id], \
-								"system_quality_per_step": pollutant_load["system"], \
+								"tss_per_step": pollutant_load["system"], \
 								"cumulative_volume": volume_cum["system"], \
 								"cumulative_tss": pollutant_load_cum["system"], \
 								"area_covered": area_covered[id], \
@@ -983,9 +1004,6 @@ def simulate_scenarios(settings_file="settings.ini"):
 			sim.report()
 		# remember to close the simulation
 		sim.close()
-	
-		# set the progressbar to complete for visual pleasure
-		if not settings["suppress_output"]: progressbar_simple(1)
 		
 		#except Exception as e:
 		#	color_print("\nSimulation failed", "red")
