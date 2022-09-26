@@ -887,7 +887,7 @@ def simulate_scenarios(settings_file="settings.ini"):
 			temp_quality["system"].append(outfall.pollut_quality[settings["pollutant"]])
 			for inlet in inlets:
 				temp_discharge[inlet.nodeid].append(inlet.lateral_inflow)
-				temp_quality[inlet.nodeid].append(inlet.pollut_quality[settings["pollutant"]])
+				temp_quality[inlet.nodeid].append(inlet.inflow_quality[settings["pollutant"]])
 			if sim_count % mod_num == 0:
 				step_times.append(sim.current_time)	# add current time stamp to the list of time steps
 				discharge["system"].append(sum(temp_discharge["system"]))	# add current system discharge to list of discharges at time steps

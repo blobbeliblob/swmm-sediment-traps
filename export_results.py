@@ -1,7 +1,8 @@
 
 # this code exports existing simulation results to excel
 
-import sediment_traps
+import sediment_traps_v2 as sediment_traps
+#import sediment_traps
 
 import os
 from shutil import copy2

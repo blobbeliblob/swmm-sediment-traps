@@ -41,26 +41,50 @@
 
 "simulation_scenarios":
 {
-	"1_day_with_rain":
+	"6_months_default":
 	{
-		"res_id": "1dwr", 
-		"input_file": "TP_HULAKAS_EMC_set_3.inp",
-		"start_date": "06/04/2009",
-		"end_date": "06/04/2009",
+		"res_id": "6_months_default", 
+		"input_file": "TP_HULAKAS_.inp",
+		"start_date": "05/01/2009",
+		"end_date": "10/31/2009",
 		"rank_junctions": "1"
 	}, 
-	"1_day_with_no_rain":
+	"6_months_EMC_set_1":
 	{
-		"res_id": "1dnr", 
-		"input_file": "TP_HULAKAS_EMC_set_3.inp",
-		"start_date": "06/01/2009",
-		"end_date": "06/01/2009",
+		"res_id": "6_months_EMC_set_1", 
+		"input_file": "TP_HULAKAS_EMC_set_1.inp",
+		"start_date": "05/01/2009",
+		"end_date": "10/31/2009",
 		"rank_junctions": "1"
 	}, 
-	"6_months":
+	"6_months_EMC_set_2":
 	{
-		"res_id": "6m", 
+		"res_id": "6_months_EMC_set_2", 
+		"input_file": "TP_HULAKAS_EMC_set_2.inp",
+		"start_date": "05/01/2009",
+		"end_date": "10/31/2009",
+		"rank_junctions": "1"
+	}, 
+	"6_months_EMC_set_3":
+	{
+		"res_id": "6_months_EMC_set_3", 
 		"input_file": "TP_HULAKAS_EMC_set_3.inp",
+		"start_date": "05/01/2009",
+		"end_date": "10/31/2009",
+		"rank_junctions": "1"
+	}, 
+	"6_months_EMC_set_4":
+	{
+		"res_id": "6_months_EMC_set_4", 
+		"input_file": "TP_HULAKAS_EMC_set_4.inp",
+		"start_date": "05/01/2009",
+		"end_date": "10/31/2009",
+		"rank_junctions": "1"
+	}, 
+	"6_months_EMC_set_5":
+	{
+		"res_id": "6_months_EMC_set_5", 
+		"input_file": "TP_HULAKAS_EMC_set_5.inp",
 		"start_date": "05/01/2009",
 		"end_date": "10/31/2009",
 		"rank_junctions": "1"

@@ -23,3 +23,7 @@ temp/
 
 notes.txt
 
+# misc
+
+simulation_scenarios *.json
+
