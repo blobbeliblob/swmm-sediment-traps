@@ -6,14 +6,17 @@ from shutil import copy2
 from pathlib import Path
 import json
 
-def main():
+def run_maintenance():
 
 	# needed for colored print to work
 	os.system("")
 	
-	settings_path = "settings_temp.ini"
+	settings_path = "settings_temp_m.ini"
 	# copy settings file to avoid corruption
-	copy2("settings.ini", settings_path)
+	if Path("settings_temp_s.ini"):
+		copy2("settings_temp_s.ini", settings_path)
+	else:
+		copy2("settings.ini", settings_path)
 	
 	# load json data
 	with open("simulation_scenarios.json") as f:
@@ -23,7 +26,7 @@ def main():
 	
 	# test scenarios, not run but used for settings modification
 	for scenario in sim_data["maintenance"]:
-		variations.append({"res_id": "maintenance_" + sim_data["maintenance"][scenario]["max_capacity"] + "kg_" + sim_data["maintenance"][scenario]["maintenance_interval"] + "d", \
+		variations.append({"maintenance_id": "maintenance_" + sim_data["maintenance"][scenario]["max_capacity"] + "kg_" + sim_data["maintenance"][scenario]["maintenance_interval"] + "d", \
 							"suppress_output": "1", \
 							"run_simulations": "0", \
 							"rank_junctions": "0", \
@@ -48,7 +51,7 @@ def main():
 		sediment_traps.export_maintenance(settings)
 		# copy the results file to results folder
 		if not os.path.isdir("maintenance"): os.mkdir("maintenance")
-		new_path = "results_" + settings["res_id"] + ".xlsx"
+		new_path = "results_" + settings["res_id"] + "_" + variation["maintenance_id"] + ".xlsx"
 		copy2(settings["results_file"], "maintenance/" + new_path)
 		# delete the temporary results file
 		os.unlink(settings["results_file"])
@@ -57,6 +60,6 @@ def main():
 	os.unlink(settings_path)
 
 if __name__ == "__main__":
-	main()
+	run_maintenance()
 
 

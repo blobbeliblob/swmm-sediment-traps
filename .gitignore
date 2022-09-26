@@ -13,8 +13,17 @@ temp/
 *.inp
 *.rpt
 *.out
+*.dat
 
 # excel files
 
 *.xlsx
+
+# TODO notes
+
+notes.txt
+
+# misc
+
+simulation_scenarios *.json
 

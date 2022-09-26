@@ -2,7 +2,7 @@
 
 ### Acknowledgements
 
-This code was developed as part of the [HuLaKaS](http://www.itamerihaaste.net/tyomme/hankkeemme/hulakas) project, with the method and results detailed further in the accompanying [master's thesis]() report. 
+This code was developed as part of the [HuLaKaS](http://www.itamerihaaste.net/tyomme/hankkeemme/hulakas) project, with the method and results detailed further in the accompanying [master's thesis](https://aaltodoc.aalto.fi/handle/123456789/116386) report. 
 
 ### Description
 

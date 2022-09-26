@@ -2,6 +2,18 @@
 # creates a progress bar
 # credit: iambr, https://stackoverflow.com/questions/3160699/python-progress-bar
 import sys
+from itertools import cycle
+
+progressbar_phases = []
+for x in ["|", "/", "—", "\\"]:
+	progressbar_phases += [x] * 100
+progressbar_phases = cycle(progressbar_phases)
+# give simple completion rate
+def progressbar_simple(completion, size=50, text="Progress: "):
+	x = int(size*completion)
+	sys.stdout.write("%s[%s%s] %02d %%   %s\r" % (text, "#"*x, "."*(size-x), completion*100, next(progressbar_phases)))
+	sys.stdout.flush()
+
 # give multiple completion rates (in fraction)
 def progressbar(completion, completion2=None, size=50, time_remaining="99:99:99", text="Progress: ", text2="Scenarios: ", text3="Time remaining: "):
 	x = int(size*completion)
