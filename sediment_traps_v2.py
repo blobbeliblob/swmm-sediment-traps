@@ -883,18 +883,18 @@ def simulate_scenarios(settings_file="settings.ini"):
 			temp_discharge[inlet.nodeid] = []
 			temp_quality[inlet.nodeid] = []
 		for step in sim:
-			temp_discharge["system"].append(outfall.total_inflow)
-			temp_quality["system"].append(outfall.pollut_quality[settings["pollutant"]])
+			temp_discharge["system"].append(outfall.total_inflow)	# inflow rate in l/s
+			temp_quality["system"].append(outfall.pollut_quality[settings["pollutant"]])	# water quality in mg/l
 			for inlet in inlets:
 				temp_discharge[inlet.nodeid].append(inlet.lateral_inflow)
 				temp_quality[inlet.nodeid].append(inlet.inflow_quality[settings["pollutant"]])
 			if sim_count % mod_num == 0:
 				step_times.append(sim.current_time)	# add current time stamp to the list of time steps
-				discharge["system"].append(sum(temp_discharge["system"]))	# add current system discharge to list of discharges at time steps
-				quality["system"].append(sum(temp_quality["system"]))	# add current pollution to list of pollution at time steps
+				discharge["system"].append(mean(temp_discharge["system"]))	# add current system discharge to list of discharges at time steps
+				quality["system"].append(mean(temp_quality["system"]))	# add current pollution to list of pollution at time steps
 				for inlet in inlets:
-					discharge[inlet.nodeid].append(sum(temp_discharge[inlet.nodeid]))
-					quality[inlet.nodeid].append(sum(temp_quality[inlet.nodeid]))
+					discharge[inlet.nodeid].append(mean(temp_discharge[inlet.nodeid]))
+					quality[inlet.nodeid].append(mean(temp_quality[inlet.nodeid]))
 				temp_discharge = {"system": []}
 				temp_quality = {"system": []}
 				for inlet in inlets:
