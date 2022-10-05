@@ -3,15 +3,6 @@
 
 @echo off
 
-:: Python version
-echo Python version:
-set "pythonversion="
-set /p pythonversion=""
-
-IF NOT DEFINED pythonversion set pythonversion=3.9
-
-echo Running with Python version %pythonversion%
-
 ::main menu
 :menu
 
@@ -35,31 +26,31 @@ IF NOT DEFINED input set input=nothing
 
 echo.
 IF %input%==1 (
-	py -%pythonversion% simulations.py
+	python simulations.py
 )
 IF %input%==2 (
-	py -%pythonversion% sediment_traps.py
+	python sediment_traps.py
 )
 IF %input%==3 (
-	py -%pythonversion% export_results.py
+	python export_results.py
 )
 IF %input%==4 (
-	py -%pythonversion% maintenance.py
+	python maintenance.py
 )
 IF %input%==5 (
-	py -%pythonversion% export_gis.py
+	python export_gis.py
 )
 IF %input%==6 (
-	py -%pythonversion% restore_all_backups.py
+	python restore_all_backups.py
 )
 IF %input%==7 (
-	py -%pythonversion% delete_all_sim_files.py
+	python delete_all_sim_files.py
 )
 IF %input%==8 (
-	py -%pythonversion% sediment_traps_v2.py
+	python sediment_traps_v2.py
 )
 IF %input%==9 (
-	py -%pythonversion% simulations_v2.py
+	python simulations_v2.py
 )
 
 IF %input%==0 (
