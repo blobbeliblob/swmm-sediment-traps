@@ -902,6 +902,19 @@ def simulate_scenarios(settings_file="settings.ini"):
 					temp_quality[inlet.nodeid] = []
 			if not settings["suppress_output"]: progressbar_simple(sim.percent_complete)	# update progressbar to current completion
 			sim_count += 1
+		# add the last simulation data to the results, otherwise there is some loss
+		if sim_count % mod_num != 0:
+			step_times.append(sim.end_time)	# add simulation end time stamp to the list of time steps
+			discharge["system"].append(mean(temp_discharge["system"]))	# add current system discharge to list of discharges at time steps
+			quality["system"].append(mean(temp_quality["system"]))	# add current pollution to list of pollution at time steps
+			for inlet in inlets:
+				discharge[inlet.nodeid].append(mean(temp_discharge[inlet.nodeid]))
+				quality[inlet.nodeid].append(mean(temp_quality[inlet.nodeid]))
+			temp_discharge = {"system": []}
+			temp_quality = {"system": []}
+			for inlet in inlets:
+				temp_discharge[inlet.nodeid] = []
+				temp_quality[inlet.nodeid] = []
 	
 		# set the progressbar to complete for visual pleasure
 		if not settings["suppress_output"]: progressbar_simple(1)
