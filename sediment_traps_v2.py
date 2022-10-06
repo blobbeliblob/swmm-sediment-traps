@@ -930,11 +930,12 @@ def simulate_scenarios(settings_file="settings.ini"):
 		# calculate land use of solution in regards to area (area in m2)
 		area_covered = {inlet: {a: areas[inlet][a] * 10**4 for a in areas[inlet]} for inlet in areas}
 		area_covered["system"] = {"total": 0}
+		for inlet in areas:
+			area_covered["system"]["total"] += area_covered[inlet]["total"]
 		for landuse in landuses:
 			area_covered["system"][landuse] = 0
 			for inlet in areas:
 				area_covered["system"][landuse] += area_covered[inlet][landuse]
-				area_covered["system"]["total"] += area_covered[inlet]["total"]
 		
 		# calculate step durations
 		step_durations = [(step_times[i+1] - step_times[i]).total_seconds() for i in range(len(step_times)-1)]
