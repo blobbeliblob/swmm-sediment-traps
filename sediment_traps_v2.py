@@ -501,12 +501,12 @@ def export_results(settings):
 			# calculate the cumulative removal (in percent)
 			cumulative_removal = cumsum([x["removal_percent"] for x in sim_res if x["nodes"] != "system"])
 			# calculate the lowest cumulative removal for comparison (in percent)
-			cumulative_removal_reversed = cumsum([x["removal_percent"] for x in sim_res][::-1] if x["nodes"] != "system"])
+			cumulative_removal_reversed = cumsum([x["removal_percent"] for x in sim_res if x["nodes"] != "system"][::-1])
 			# difference between best and worst cumulative removal (in percent)
 			cumulative_best_worst_difference = [cumulative_removal[i]-cumulative_removal_reversed[i] for i in range(len(cumulative_removal))]
 			# average cumulative removal
-			mean_removal = mean([x["removal_percent"] for x in sim_res if x["nodes"] != "system"]])
-			cumulative_mean = cumsum([mean_removal for x in sim_res if x["nodes"] != "system"]])
+			mean_removal = mean([x["removal_percent"] for x in sim_res if x["nodes"] != "system"])
+			cumulative_mean = cumsum([mean_removal for x in sim_res if x["nodes"] != "system"])
 			# insert system value to statistics
 			cumulative_removal.insert(0, 0)
 			cumulative_removal_reversed.insert(0, 0)
