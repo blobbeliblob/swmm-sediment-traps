@@ -470,10 +470,10 @@ def export_maintenance(settings):
 			cumulative_mean = cumsum([mean_removal for x in sim_res if x["nodes"] != "system"])
 			mean_removal_maintenance = mean([x["removal_percent_maintenance"] for x in sim_res if x["nodes"] != "system"])
 			cumulative_mean_maintenance = cumsum([mean_removal_maintenance for x in sim_res if x["nodes"] != "system"])
-			cumulative_removal.insert(0, 0)
-			cumulative_removal_maintenance.insert(0, 0)
-			cumulative_mean.insert(0, 0)
-			cumulative_mean_maintenance.insert(0, 0)
+			cumulative_removal = [x for x in cumulative_removal].insert(0, 0)
+			cumulative_removal_maintenance = [x for x in cumulative_removal_maintenance].insert(0, 0)
+			cumulative_mean = [x for x in cumulative_mean].insert(0, 0)
+			cumulative_mean_maintenance = [x for x in cumulative_mean_maintenance].insert(0, 0)
 			DataFrame({"nodes": [str(list(x["nodes"])).replace("[", "").replace("]", "").replace("'", "").replace(settings["junction_suffix"], "") for x in sim_res], \
 						"Max capacity (kg)": [settings["max_capacity"] for x in sim_res], \
 						"Maintenance interval (days)": [settings["maintenance_interval"] for x in sim_res], \
@@ -508,10 +508,10 @@ def export_results(settings):
 			mean_removal = mean([x["removal_percent"] for x in sim_res if x["nodes"] != "system"])
 			cumulative_mean = cumsum([mean_removal for x in sim_res if x["nodes"] != "system"])
 			# insert system value to statistics
-			cumulative_removal.insert(0, 0)
-			cumulative_removal_reversed.insert(0, 0)
-			cumulative_best_worst_difference.insert(0, 0)
-			cumulative_mean.insert(0, 0)
+			cumulative_removal = [x for x in cumulative_removal].insert(0, 0)
+			cumulative_removal_reversed = [x for x in cumulative_removal_reversed].insert(0, 0)
+			cumulative_best_worst_difference = [x for x in cumulative_best_worst_difference].insert(0, 0)
+			cumulative_mean = [x for x in cumulative_mean].insert(0, 0)
 			# general results
 			DataFrame({"start date": [x["start"] for x in sim_res], \
 						"end date": [x["end"] for x in sim_res], \
