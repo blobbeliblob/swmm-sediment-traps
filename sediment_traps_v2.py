@@ -423,7 +423,7 @@ def calc_maintenance_efficiency(settings):
 	simulation_results = get_simulation_results()
 	print("\nCalculating maintenance...")
 	for res in simulation_results:
-		if len(res["nodes"]) != 0:
+		if res["nodes"] != "system":
 			maintenance = []	# for each time step, 1 if maintenance, 0 if not
 			time_before_maintenance = settings["maintenance_interval"]*86400	# time remaining before maintenance is scheduled
 			for i in range(len(res["step_times"])-1):
@@ -433,41 +433,25 @@ def calc_maintenance_efficiency(settings):
 					time_before_maintenance = settings["maintenance_interval"]*86400
 				else:
 					maintenance.append(0)
-			tss_to_be_added = 0	# amount of pollutant to be added to the system total because it exceded filter capacity
+			overflowed_pollutant = 0	# amount of pollutant to be added to the system total because it exceeded filter capacity
 			stored_pollutant = 0	# amount of pollutant currently in filter
-			removal_per_step = []	# removal for each time step
-			for x in range(len(res["tss_per_step"])):
-				diff = simulation_results[0]["tss_per_step"][x] - res["tss_per_step"][x]
-				removal_per_step.append(abs(diff))
-			#for i in range(len(res["tss_manhole_per_step"])-1):
+			removed_pollutant = 0	# amount of pollutant removed by filter
+			filter_efficiency = float(settings["formula"].split("=")[1])	# efficiency of the filter
 			for i in range(len(res["tss_per_step"])-1):
 				if maintenance[i] == 1:	# if maintenance is scheduled
+					removed_pollutant += stored_pollutant
 					stored_pollutant = 0	# empty filter
-				filter_efficiency = float(settings["formula"].split("=")[1])	# efficiency of the filter
 				if stored_pollutant > settings["max_capacity"]*(10**6):	# unit convert max capacity from kg -> mg
-					#tss_to_be_added += res["tss_manhole_per_step"][i]/(1-filter_efficiency)*filter_efficiency
-					tss_to_be_added += removal_per_step[i]
+					overflowed_pollutant += res["tss_per_step"][i]	# overflow, nothing captured by filter
 				else:
-					#stored_pollutant += res["tss_manhole_per_step"][i]/(1-filter_efficiency)*filter_efficiency
-					stored_pollutant += removal_per_step[i]
-			total_TSS_maintenance = res["total_TSS"] + tss_to_be_added
-			print_info = False
-			if print_info:
-				print("node:\t\t\t\t", res["nodes"][0])
-				print("node stored pollutant:\t\t", stored_pollutant/10**6)
-				print("pollutant through node:\t\t", sum(res["tss_manhole_per_step"])/10**6)
-				print("system pollutant removal:\t", res["removal_mass"]/10**6)
-				print("system pollutant removal 2:\t", sum(removal_per_step)/10**6)
-				print("system pollutant out:\t\t", res["total_TSS_system"]/10**6)
-				print("total_TSS_maintenance:\t\t", total_TSS_maintenance/10**6)
-				print("maintenance > system:\t\t", total_TSS_maintenance > res["total_TSS_system"])
-				print("filter efficiency:\t\t", filter_efficiency)
-				print("index:\t\t\t\t", res["i"])
-				print("-----")
+					stored_pollutant += res["tss_per_step"][i] * filter_efficiency	# captured by filter
+					overflowed_pollutant += res["tss_per_step"][i] * (1-filter_efficiency)	# not captured by filter
+			removed_pollutant += stored_pollutant	# final removal
+			total_TSS_maintenance = res["total_TSS"] - removed_pollutant
 		else:
-			total_TSS_maintenance = res["total_TSS"]
-		res["removal_mass_maintenance"] = res["total_TSS_system"] - total_TSS_maintenance
-		res["removal_percent_maintenance"] = 0 if res["total_TSS_system"] == 0 else res["removal_mass_maintenance"] / res["total_TSS_system"] * 100
+			removed_pollutant = 0
+		res["removal_mass_maintenance"] = removed_pollutant
+		res["removal_percent_maintenance"] = 0 if res["total_TSS"] == 0 else res["removal_mass_maintenance"] / res["total_TSS"] * 100
 		res["maintenance_removal_potential"] = res["removal_mass"] - res["removal_mass_maintenance"]
 		res["maintenance_removal_potential_percentage"] = 0 if res["removal_mass"] == 0 else res["removal_mass_maintenance"] / res["removal_mass"] * 100
 	color_print("Complete", "green")
@@ -480,12 +464,16 @@ def export_maintenance(settings):
 	with ExcelWriter(settings["results_file"]) as writer:
 		for criteria in settings["order_criteria"]:
 			sim_res = get_ranked_solutions(simulation_results, criteria)
-			cumulative_removal = cumsum([x["removal_percent"] for x in sim_res])
-			cumulative_removal_maintenance = cumsum([x["removal_percent_maintenance"] for x in sim_res])
-			mean_removal = mean([x["removal_percent"] for x in sim_res])
-			cumulative_mean = cumsum([mean_removal for x in sim_res])
-			mean_removal_maintenance = mean([x["removal_percent_maintenance"] for x in sim_res])
-			cumulative_mean_maintenance = cumsum([mean_removal_maintenance for x in sim_res])
+			cumulative_removal = cumsum([x["removal_percent"] for x in sim_res if x["nodes"] != "system"])
+			cumulative_removal_maintenance = cumsum([x["removal_percent_maintenance"] for x in sim_res if x["nodes"] != "system"])
+			mean_removal = mean([x["removal_percent"] for x in sim_res if x["nodes"] != "system"])
+			cumulative_mean = cumsum([mean_removal for x in sim_res if x["nodes"] != "system"])
+			mean_removal_maintenance = mean([x["removal_percent_maintenance"] for x in sim_res if x["nodes"] != "system"])
+			cumulative_mean_maintenance = cumsum([mean_removal_maintenance for x in sim_res if x["nodes"] != "system"])
+			cumulative_removal.insert(0, 0)
+			cumulative_removal_maintenance.insert(0, 0)
+			cumulative_mean.insert(0, 0)
+			cumulative_mean_maintenance.insert(0, 0)
 			DataFrame({"nodes": [str(list(x["nodes"])).replace("[", "").replace("]", "").replace("'", "").replace(settings["junction_suffix"], "") for x in sim_res], \
 						"Max capacity (kg)": [settings["max_capacity"] for x in sim_res], \
 						"Maintenance interval (days)": [settings["maintenance_interval"] for x in sim_res], \
@@ -998,7 +986,7 @@ def simulate_scenarios(settings_file="settings.ini"):
 								"nodes": [id], \
 								"total_volume": volume_tot[id], \
 								"flow_error": flow_error, \
-								"total_TSS": pollutant_load_tot["system"], \
+								"total_TSS": sum([pollutant_load_tot[x] for x in pollutant_load_tot if x != "system"]), \
 								"total_TSS_system": pollutant_load_tot["system"], \
 								"quality_error": quality_error, \
 								"removal_mass": pollutant_load_tot[id], \
