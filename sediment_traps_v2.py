@@ -127,7 +127,7 @@ def get_points_of_interest(input_file):
 		for s in subcatchments:
 			if subcatchments[s]["outlet"] not in subcatchments.keys():
 				sub_of_int.append(s)
-		# find junctions that have incoming flow from subcatchments
+		# find junctions that have incoming flow from subcatchments, i.e. inlets
 		junc_of_int = []	# [junction_1, junction_2, ...]
 		for s in sub_of_int:
 			if subcatchments[s]["outlet"] not in junc_of_int:	# avoid duplicates
@@ -152,6 +152,14 @@ def get_points_of_interest(input_file):
 		for c in conduits:
 			if conduits[c]["to"] in junc_of_int and conduits[c]["to"] not in junc_to_mod:
 				junc_to_mod.append(conduits[c]["to"])
+		# find inlets which receive water from other inlets, requires model to not have divider junctions that split water
+		upstream_inlets = {}
+		for j in junc_of_int:
+			upstream_nodes = get_upstream_nodes(j, conduits)
+			upstream_inlets[j] = [x for x in upstream_nodes if x in junc_of_int]
+		immediate_upstream_nodes = {}
+		for j in junc_of_int:
+			immediate_upstream_nodes[j] = get_immediate_upstream_nodes(j, conduits)
 		# find junctions that have incoming flow from different land uses
 		cov_of_int = {}	# {subcatchment_1: {land_use_1: value, land_use_2: value, ...}, subcatchment_2: ...}
 		for s in coverages:
@@ -173,7 +181,27 @@ def get_points_of_interest(input_file):
 				for c in coverages[s]:
 					junc_area[j][c] += float(coverages[s][c]) / 100 * float(subcatchments[s]["area"])
 					junc_area[j]["total"] += float(coverages[s][c]) / 100 * float(subcatchments[s]["area"])
-		return {"junctions_with_manholes": junc_of_int, "junctions_to_modify": junc_to_mod, "junction_coverages": junc_cov, "junction_areas": junc_area}
+		return {"junctions_with_manholes": junc_of_int, "junctions_to_modify": junc_to_mod, "junction_coverages": junc_cov, "junction_areas": junc_area, "upstream_inlets": upstream_inlets, "immediate_upstream_nodes": immediate_upstream_nodes}
+
+# get nodes upstream of node
+def get_upstream_nodes(node, conduits):
+	upstream_nodes = []
+	direct_upstream_nodes = []
+	for c in conduits:
+		if node == conduits[c]["to"]:
+			direct_upstream_nodes.append(conduits[c]["from"])
+	for upstream_node in direct_upstream_nodes:
+		upstream_nodes.append(upstream_node)
+		upstream_nodes += get_upstream_nodes(upstream_node, conduits)
+	return upstream_nodes
+
+# get immediate upstream nodes of node
+def get_immediate_upstream_nodes(node, conduits):
+	direct_upstream_nodes = []
+	for c in conduits:
+		if node == conduits[c]["to"]:
+			direct_upstream_nodes.append(conduits[c]["from"])
+	return direct_upstream_nodes
 
 # create new junctions to separate incoming flow from subcatchments and other junctions
 # returns a list with the new nodes representing manholes (+ the old nodes which were only manholes and not junctions)
@@ -799,6 +827,7 @@ def simulate_scenarios(settings_file="settings.ini"):
 	landuses = data["junction_coverages"]
 	areas = data["junction_areas"]	# areas in ha
 	sewer_inlets = data["junctions_with_manholes"]
+	immediate_upstream_nodes = data["immediate_upstream_nodes"]
 	color_print("Complete", "green")
 	
 	# get treatment scenarios
