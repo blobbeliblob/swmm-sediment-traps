@@ -153,7 +153,7 @@ def get_points_of_interest(input_file):
 			if conduits[c]["to"] in junc_of_int and conduits[c]["to"] not in junc_to_mod:
 				junc_to_mod.append(conduits[c]["to"])
 		# find inlets which receive water from other inlets, requires model to not have divider junctions that split water
-		upstream_inlets = {}
+		upstream_inlets = {}	# {inlet: [inlet_1, inlet_2, ...]}
 		for j in junc_of_int:
 			upstream_nodes = get_upstream_nodes(j, conduits)
 			upstream_inlets[j] = [x for x in upstream_nodes if x in junc_of_int]
@@ -826,6 +826,9 @@ def simulate_scenarios(settings_file="settings.ini"):
 	# get data from input file about the points to modify
 	print("\nReading data from input file...")
 	data = get_points_of_interest(inp_file)
+	if settings["separate_junctions"]:
+		separate_junctions(inp_file, data, settings)
+		data = get_points_of_interest(inp_file)
 	landuses = data["junction_coverages"]
 	areas = data["junction_areas"]	# areas in ha
 	sewer_inlets = data["junctions_with_manholes"]
@@ -884,7 +887,8 @@ def simulate_scenarios(settings_file="settings.ini"):
 		inlets = [node for node in Nodes(sim) if node.nodeid in sewer_inlets]	# nodes that receive water from subcatchments
 		lateral_inflow = {"system": []}	# lateral inflow at nodes
 		total_inflow = {"system": []}	# total inflow at nodes
-		volume = {}
+		volume_lateral_inflow = {}
+		volume_total_inflow = {}
 		volume_cum = {}
 		volume_tot = {}
 		quality = {"system": []}	# water quality (concentration)
@@ -983,10 +987,11 @@ def simulate_scenarios(settings_file="settings.ini"):
 		# V_tot = sum( V_i ) = sum( Q_i * dt )
 		# pollutant load in mg
 		# TSS_tot = sum ( TSS_i ) = sum ( C(TSS)_i * V_i )
-		volume["system"] = [lateral_inflow["system"][i] * step_durations[i] for i in range(len(lateral_inflow["system"]))]
-		volume_cum["system"] = cumsum(volume["system"])
-		volume_tot["system"] = sum(volume["system"])
-		pollutant_load["system"] = [quality["system"][i] * volume["system"][i] for i in range(len(quality["system"]))]
+		volume_lateral_inflow["system"] = [lateral_inflow["system"][i] * step_durations[i] for i in range(len(lateral_inflow["system"]))]
+		volume_total_inflow["system"] = [total_inflow["system"][i] * step_durations[i] for i in range(len(total_inflow["system"]))]
+		volume_cum["system"] = cumsum(volume_lateral_inflow["system"])
+		volume_tot["system"] = sum(volume_lateral_inflow["system"])
+		pollutant_load["system"] = [quality["system"][i] * volume_total_inflow["system"][i] for i in range(len(quality["system"]))]
 		pollutant_load_cum["system"] = cumsum(pollutant_load["system"])
 		pollutant_load_tot["system"] = sum(pollutant_load["system"])
 		pollutant_load_removal_percent["system"] = 0
@@ -995,9 +1000,10 @@ def simulate_scenarios(settings_file="settings.ini"):
 		# inlet properties
 		# volume
 		for inlet in inlets:
-			volume[inlet.nodeid] = [lateral_inflow[inlet.nodeid][i] * step_durations[i] for i in range(len(lateral_inflow[inlet.nodeid]))]
-			volume_cum[inlet.nodeid] = cumsum(volume[inlet.nodeid])
-			volume_tot[inlet.nodeid] = sum(volume[inlet.nodeid])
+			volume_lateral_inflow[inlet.nodeid] = [lateral_inflow[inlet.nodeid][i] * step_durations[i] for i in range(len(lateral_inflow[inlet.nodeid]))]
+			volume_total_inflow[inlet.nodeid] = [total_inflow[inlet.nodeid][i] * step_durations[i] for i in range(len(total_inflow[inlet.nodeid]))]
+			volume_cum[inlet.nodeid] = cumsum(volume_lateral_inflow[inlet.nodeid])
+			volume_tot[inlet.nodeid] = sum(volume_lateral_inflow[inlet.nodeid])
 		# upstream pollutant contribution
 		total_volume_through_node = {}
 		total_pollutant_through_node = {}
@@ -1006,13 +1012,14 @@ def simulate_scenarios(settings_file="settings.ini"):
 			total_volume_through_node[inlet.nodeid] = [total_inflow[inlet.nodeid][i] * step_durations[i] for i in range(len(total_inflow[inlet.nodeid]))]
 			total_pollutant_through_node[inlet.nodeid] = [quality[inlet.nodeid][i] * total_volume_through_node[inlet.nodeid][i] for i in range(len(quality[inlet.nodeid]))]
 		for inlet in inlets:
-			upstream_pollutant_contribution[inlet.nodeid] = 0
+			upstream_pollutant_contribution[inlet.nodeid] = [0 for i in range(len(total_pollutant_through_node[inlet.nodeid]))]
 			for node in upstream_inlets[inlet.nodeid]:
-				upstream_pollutant_contribution[inlet.nodeid] += total_pollutant_through_node[node]
+				for i in range(len(upstream_pollutant_contribution[inlet.nodeid])):
+					upstream_pollutant_contribution[inlet.nodeid][i] += total_pollutant_through_node[node][i]
 		# pollutant load
 		for inlet in inlets:
-			#pollutant_load[inlet.nodeid] = [quality[inlet.nodeid][i] * volume[inlet.nodeid][i] for i in range(len(quality[inlet.nodeid]))]
-			pollutant_load[inlet.nodeid] = [abs(total_pollutant_through_node[i] - upstream_pollutant_contribution[i]) for i in range(len(total_pollutant_through_node))]
+			#pollutant_load[inlet.nodeid] = [quality[inlet.nodeid][i] * volume_lateral_inflow[inlet.nodeid][i] for i in range(len(quality[inlet.nodeid]))]
+			pollutant_load[inlet.nodeid] = [abs(total_pollutant_through_node[inlet.nodeid][i] - upstream_pollutant_contribution[inlet.nodeid][i]) for i in range(len(total_pollutant_through_node[inlet.nodeid]))]
 			pollutant_load_cum[inlet.nodeid] = cumsum(pollutant_load[inlet.nodeid])
 			pollutant_load_tot[inlet.nodeid] = sum(pollutant_load[inlet.nodeid])
 			pollutant_load_removal_percent[inlet.nodeid] = 0 if pollutant_load_tot["system"] == 0 else pollutant_load_tot[inlet.nodeid] / pollutant_load_tot["system"] * 100
@@ -1052,13 +1059,13 @@ def simulate_scenarios(settings_file="settings.ini"):
 								"removal_percent": pollutant_load_removal_percent[id], \
 								"removal_per_area": pollutant_load_removal_per_area[id], \
 								"step_times": step_times, \
-								"volume_per_step": volume[id], \
+								"volume_per_step": volume_lateral_inflow[id], \
 								"tss_per_step": pollutant_load[id], \
 								"cumulative_volume": volume_cum[id], \
 								"cumulative_tss": pollutant_load_cum[id], \
 								"area_covered": area_covered[id], \
 								"area_covered_total": area_covered[id]["total"]}
-			exported_results["volume_manhole_per_step"] = volume[id] if id != "system" else None
+			exported_results["volume_manhole_per_step"] = volume_lateral_inflow[id] if id != "system" else None
 			exported_results["tss_manhole_per_step"] = pollutant_load[id] if id != "system" else None
 			pickle.dump(exported_results, open("temp/simulation_results_"+str(count)+".p", "wb"))
 			count += 1
