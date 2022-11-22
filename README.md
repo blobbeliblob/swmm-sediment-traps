@@ -4,6 +4,8 @@
 
 This code was developed as part of the [HuLaKaS](http://www.itamerihaaste.net/tyomme/hankkeemme/hulakas) project, with the method and results detailed further in the accompanying [master's thesis](https://aaltodoc.aalto.fi/handle/123456789/116386) report. 
 
+UPDATE: v2 of the code is detailed in the [article](). 
+
 ### Description
 
 The code simulates the installation of sediment traps into the sewer inlets of urban catchments parametrized in US EPA's Storm Water Management Model ([SWMM](https://www.epa.gov/water-research/storm-water-management-model-swmm)). 
@@ -16,12 +18,6 @@ The code requires the pyswmm package, available [here](https://github.com/OpenWa
 
 ```
 pip install pyswmm
-```
-
-If there are errors encountered, this may be due to the swmm-toolkit package not being properly installed. If this happens, download it [here](https://github.com/OpenWaterAnalytics/swmm-python) and install the .whl file
-
-```
-pip install path/to/the/file.whl
 ```
 
 Make sure you are running a compatible version of Python!
