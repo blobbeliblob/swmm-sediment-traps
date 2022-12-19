@@ -9,7 +9,7 @@
 	"res_id": "default",
 	"restore_backup": "1",
 	"create_backup": "1",
-	"separate_junctions": "1",
+	"separate_junctions": "0",
 	"height_offset": "0.001",
 	"conduit_length": "2.3",
 	"coord_offset": "0.5",
@@ -18,7 +18,7 @@
 	"number_of_scenarios": "0",
 	"number_of_samples": "5",
 	"pollutant": "TSS",
-	"formula": "R;0.917",
+	"formula": "R;0.63",
 	"max_capacity": "40",
 	"maintenance_interval": "30",
 	"use_specific_scenarios": "0",
@@ -41,20 +41,52 @@
 
 "simulation_scenarios":
 {
-	"1_day_with_rain":
+	"2_years_default_snow":
 	{
-		"res_id": "1dwr", 
-		"input_file": "TP_HULAKAS_EMC_set_3.inp",
-		"start_date": "06/04/2009",
-		"end_date": "06/04/2009",
+		"res_id": "2_years_default_snow", 
+		"input_file": "TP_HULAKAS_snow.inp",
+		"start_date": "01/01/2009",
+		"end_date": "12/31/2010",
 		"rank_junctions": "1"
 	}, 
-	"1_day_with_no_rain":
+	"2_years_EMC_set_1_snow":
 	{
-		"res_id": "1dnr", 
-		"input_file": "TP_HULAKAS_EMC_set_3.inp",
-		"start_date": "06/01/2009",
-		"end_date": "06/01/2009",
+		"res_id": "2_years_EMC_set_1_snow", 
+		"input_file": "TP_HULAKAS_EMC_set_1_snow.inp",
+		"start_date": "01/01/2009",
+		"end_date": "12/31/2010",
+		"rank_junctions": "1"
+	}, 
+	"2_years_EMC_set_2_snow":
+	{
+		"res_id": "2_years_EMC_set_2_snow", 
+		"input_file": "TP_HULAKAS_EMC_set_2_snow.inp",
+		"start_date": "01/01/2009",
+		"end_date": "12/31/2010",
+		"rank_junctions": "1"
+	}, 
+	"2_years_EMC_set_3_snow":
+	{
+		"res_id": "2_years_EMC_set_3_snow", 
+		"input_file": "TP_HULAKAS_EMC_set_3_snow.inp",
+		"start_date": "01/01/2009",
+		"end_date": "12/31/2010",
+		"rank_junctions": "1"
+	}, 
+	"2_years_EMC_set_4_snow":
+	{
+		"res_id": "2_years_EMC_set_4_snow", 
+		"input_file": "TP_HULAKAS_EMC_set_4_snow.inp",
+		"start_date": "01/01/2009",
+		"end_date": "12/31/2010",
+		"rank_junctions": "1"
+	}, 
+	"2_years_EMC_set_5_snow":
+	{
+		"res_id": "2_years_EMC_set_5_snow", 
+		"input_file": "TP_HULAKAS_EMC_set_5_snow.inp",
+		"start_date": "01/01/2009",
+		"end_date": "12/31/2010",
 		"rank_junctions": "1"
 	}
 }, 
