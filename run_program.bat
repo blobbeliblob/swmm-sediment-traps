@@ -16,8 +16,6 @@ echo 4 = Maintenance
 echo 5 = Export GIS
 echo 6 = Restore all backups
 echo 7 = Delete all simulation files
-echo 8 = Simulation ^(performance basic^)
-echo 9 = Simulation ^(performance automated^)
 echo exit = Terminate program
 echo cls = Clear terminal
 
@@ -45,12 +43,6 @@ IF %input%==6 (
 )
 IF %input%==7 (
 	python delete_all_sim_files.py
-)
-IF %input%==8 (
-	python sediment_traps_v2.py
-)
-IF %input%==9 (
-	python simulations_v2.py
 )
 
 IF %input%==0 (

@@ -24,9 +24,12 @@ def main():
 	
 	##########
 	
+	# change default settings
+	default_settings = {param: sim_data["default_settings"][param] for param in sim_data["default_settings"]}
+	sediment_traps.write_settings(settings_path, default_settings)
 	count = 0
 	for variation in variations:
-		# change settings
+		# change simulation specific settings
 		sediment_traps.write_settings(settings_path, variation)
 		# read settings from file
 		settings = sediment_traps.read_settings(settings_path)
