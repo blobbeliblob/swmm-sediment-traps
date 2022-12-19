@@ -1,5 +1,5 @@
 
-import sediment_traps_v2 as sediment_traps
+import as sediment_traps
 #import sediment_traps
 
 import os

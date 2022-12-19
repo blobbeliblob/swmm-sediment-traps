@@ -1,8 +1,6 @@
 
 # delete all simulation related files, including temporary results
 
-import sediment_traps
-
 import os
 from shutil import copy2
 from pathlib import Path

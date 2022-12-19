@@ -41,50 +41,18 @@
 
 "simulation_scenarios":
 {
-	"2_years_default_snow":
+	"example_scenario_1":
 	{
-		"res_id": "2_years_default_snow", 
-		"input_file": "TP_HULAKAS_snow.inp",
+		"res_id": "example_scenario_1", 
+		"input_file": "file_1.inp",
 		"start_date": "01/01/2009",
 		"end_date": "12/31/2010",
 		"rank_junctions": "1"
 	}, 
-	"2_years_EMC_set_1_snow":
+	"example_scenario_2":
 	{
-		"res_id": "2_years_EMC_set_1_snow", 
-		"input_file": "TP_HULAKAS_EMC_set_1_snow.inp",
-		"start_date": "01/01/2009",
-		"end_date": "12/31/2010",
-		"rank_junctions": "1"
-	}, 
-	"2_years_EMC_set_2_snow":
-	{
-		"res_id": "2_years_EMC_set_2_snow", 
-		"input_file": "TP_HULAKAS_EMC_set_2_snow.inp",
-		"start_date": "01/01/2009",
-		"end_date": "12/31/2010",
-		"rank_junctions": "1"
-	}, 
-	"2_years_EMC_set_3_snow":
-	{
-		"res_id": "2_years_EMC_set_3_snow", 
-		"input_file": "TP_HULAKAS_EMC_set_3_snow.inp",
-		"start_date": "01/01/2009",
-		"end_date": "12/31/2010",
-		"rank_junctions": "1"
-	}, 
-	"2_years_EMC_set_4_snow":
-	{
-		"res_id": "2_years_EMC_set_4_snow", 
-		"input_file": "TP_HULAKAS_EMC_set_4_snow.inp",
-		"start_date": "01/01/2009",
-		"end_date": "12/31/2010",
-		"rank_junctions": "1"
-	}, 
-	"2_years_EMC_set_5_snow":
-	{
-		"res_id": "2_years_EMC_set_5_snow", 
-		"input_file": "TP_HULAKAS_EMC_set_5_snow.inp",
+		"res_id": "example_scenario_2", 
+		"input_file": "file_2.inp",
 		"start_date": "01/01/2009",
 		"end_date": "12/31/2010",
 		"rank_junctions": "1"
