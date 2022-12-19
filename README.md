@@ -1,8 +1,10 @@
 # swmm-sediment-traps
 
+A method to assess the stormwater pollution of a catchment and the potential removal achieved through the installation of sewer-inlet-installed sediment traps. The method creates a ranking of the inlets according to the pollutant load that can be removed by installing a sediment trap in them. 
+
 ### Acknowledgements
 
-This code was developed as part of the [HuLaKaS](http://www.itamerihaaste.net/tyomme/hankkeemme/hulakas) project, with the method and results detailed further in the accompanying [master's thesis](https://aaltodoc.aalto.fi/handle/123456789/116386) report. 
+This code was developed at Aalto University as part of the [HuLaKaS](http://www.itamerihaaste.net/tyomme/hankkeemme/hulakas) project, with the method and results detailed further in the accompanying [master's thesis](https://aaltodoc.aalto.fi/handle/123456789/116386) report. 
 
 UPDATE: v2 of the code is detailed in the [article](). 
 
@@ -21,7 +23,7 @@ pip install pyswmm
 ```
 
 Make sure you are running a compatible version of Python!
-As of 16.08.2022, Python 3.6, 3.8, 3.9 have been tested. 
+As of 16.08.2022, Python 3.6, 3.8, 3.9, 3.10 have been tested. 
 
 When running the code, if there is a pyswmm error where solver.py is not being found, go to the python site-packages and copy all .dll files from *swmm_toolkit/* into *swmm/toolkit/*.
 
