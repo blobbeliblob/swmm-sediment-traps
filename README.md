@@ -33,6 +33,6 @@ The code can be executed by running *run_program.bat*, which serves to run the v
 
 ### License
 
-see the included [license](https://github.com/blobbeliblob/swmm-sediment-traps/blob/main/LICENSE).
+See the included [license](https://github.com/blobbeliblob/swmm-sediment-traps/blob/main/LICENSE).
 
 
