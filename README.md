@@ -6,7 +6,7 @@ A method to assess the stormwater pollution of a catchment and the potential rem
 
 This code was developed at Aalto University as part of the [HuLaKaS](http://www.itamerihaaste.net/tyomme/hankkeemme/hulakas) project, with the method and results detailed further in the accompanying [master's thesis](https://aaltodoc.aalto.fi/handle/123456789/116386) report. 
 
-UPDATE: v2 of the code is detailed in the [article](). 
+UPDATE: v2 of the code is detailed in an upcoming [article](). 
 
 ### Description
 
